@@ -9,9 +9,11 @@
         "dev": "ts-node src/index.ts"
     },
     "devDependencies": {
-        "typescript": "^5.4.5",
+        "@types/node": "^20.12.7",
         "ts-node": "^10.9.2",
-        "@types/node": "^20.12.7"
+        "typescript": "^5.4.5"
     },
-    "dependencies": {}
+    "dependencies": {
+        "winston": "^3.19.0"
+    }
 }
