@@ -7,5 +7,6 @@ export const UKGConfig = {
   grantType: env.UKG_GRANT_TYPE,
   organization: env.UKG_ORGANIZATION,
   authUrl: env.UKG_AUTH_URL || "",
-  apiBaseUrl: env.UKG_API_BASE_URL || ""
+  apiBaseUrl: env.UKG_API_BASE_URL || "",
+  hyperfindId: {"NON-SIGNED-OFF-CO-WORKERS": "7842"}
 };
