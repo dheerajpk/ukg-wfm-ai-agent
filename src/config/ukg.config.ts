@@ -8,5 +8,5 @@ export const UKGConfig = {
   organization: env.UKG_ORGANIZATION,
   authUrl: env.UKG_AUTH_URL || "",
   apiBaseUrl: env.UKG_API_BASE_URL || "",
-  hyperfindId: {"NON-SIGNED-OFF-CO-WORKERS": "7842"}
+  hyperfindId: {"NON-SIGNED-OFF-CO-WORKERS": "806"}
 };

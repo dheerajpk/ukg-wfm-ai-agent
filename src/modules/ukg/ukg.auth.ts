@@ -12,7 +12,8 @@ export const getAccessToken = async () => {
       client_id: UKGConfig.clientId,
       client_secret: UKGConfig.clientSecret,
       audience: UKGConfig.audience,
-      grant_type: UKGConfig.grantType
+      grant_type: UKGConfig.grantType,
+      organization: UKGConfig.organization
     })
   });
   const data: any = await response.json();

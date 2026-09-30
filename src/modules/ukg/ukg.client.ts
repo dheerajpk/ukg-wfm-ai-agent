@@ -13,11 +13,18 @@ export const fetchRequest = async <T>(
       ...options.headers,
       Authorization: `Bearer ${token}`
     };
+    logger.info(
+      `Executing UKG request to endpoint: ${endpoint} with options: ${JSON.stringify(options)}`
+    );
     const response = await fetch(`${UKGConfig.apiBaseUrl}${endpoint}`, options);
     if (!response.ok) {
       throw new Error(`UKG API error: ${response.status}`);
     }
-    return response.json() as Promise<T>;
+    const data = (await response.json()) as Promise<T>;
+    logger.info(
+      `UKG request to endpoint: ${endpoint} succeeded with response: ${JSON.stringify(data)}`
+    );
+    return data;
   } catch (error) {
     logger.error("Error executing UKG request", error);
     throw error;
