@@ -36,10 +36,10 @@ const ExecuteHyperfindInputSchema = z.object({
 
 // Executor invoked when the model calls the get_unsigned_co_workers_info tool.
 export const getUnsignedCoWorkersInfoHandler = async (
-  _args: Record<string, unknown>
+  args: Record<string, unknown>
 ): Promise<HyperfindNonSignedCW> => {
   const hyperfindService = new HyperfindService();
-  return await hyperfindService.getUnsignedCoWorkersInfo();
+  return await hyperfindService.getUnsignedCoWorkersInfo(args);
 };
 
 /**

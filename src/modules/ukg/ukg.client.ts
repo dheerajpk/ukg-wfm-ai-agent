@@ -11,7 +11,8 @@ export const fetchRequest = async <T>(
     const token = await getAccessToken();
     options.headers = {
       ...options.headers,
-      Authorization: `Bearer ${token}`
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json"
     };
     logger.info(
       `Executing UKG request to endpoint: ${endpoint} with options: ${JSON.stringify(options)}`

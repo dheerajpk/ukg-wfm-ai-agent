@@ -9,12 +9,12 @@ export class HyperfindService {
   constructor() {}
 
   // Fetches information about unsigned co-workers from the Hyperfind API.
-  async getUnsignedCoWorkersInfo(): Promise<HyperfindNonSignedCW> {
-    const dateRange = {
-      symbolicPeriod: {
-        qualifier: "Previous_Payperiod"
-      }
-    };
+  async getUnsignedCoWorkersInfo(params: any): Promise<HyperfindNonSignedCW> {
+    const {startDate, endDate} = params;
+    const dateRange =
+      startDate && endDate
+        ? {startDate, endDate}
+        : {symbolicPeriod: {qualifier: "Previous_Payperiod"}};
 
     const response = await fetchRequest<ExecuteHyperfindResponse>(
       "v1/commons/hyperfind/execute",
