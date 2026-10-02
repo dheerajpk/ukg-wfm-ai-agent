@@ -107,7 +107,9 @@ export class GeminiProvider implements AiProvider {
               parts.push({
                 functionCall: {
                   name: toolCall.function.name,
-                  args: this.safeJsonParse(toolCall.function.arguments)
+                  args: this.toStructPayload(
+                    this.safeJsonParse(toolCall.function.arguments)
+                  )
                 }
               });
             }
@@ -137,7 +139,9 @@ export class GeminiProvider implements AiProvider {
               {
                 functionResponse: {
                   name: toolName,
-                  response: this.safeJsonParse(message.content ?? "{}")
+                  response: this.toStructPayload(
+                    this.safeJsonParse(message.content ?? "{}")
+                  )
                 }
               }
             ]
@@ -233,7 +237,7 @@ export class GeminiProvider implements AiProvider {
     };
   }
 
-  private safeJsonParse(value: string): Record<string, unknown> {
+  private safeJsonParse(value: string): unknown {
     try {
       return JSON.parse(value);
     } catch {
@@ -241,5 +245,18 @@ export class GeminiProvider implements AiProvider {
         value
       };
     }
+  }
+
+  // Gemini's functionCall.args / functionResponse.response must be a Struct (object), so non-object values need wrapping.
+  private toStructPayload(
+    parsed: unknown
+  ): Record<string, unknown> {
+    if (parsed !== null && typeof parsed === "object" && !Array.isArray(parsed)) {
+      return parsed as Record<string, unknown>;
+    }
+
+    return {
+      result: parsed
+    };
   }
 }

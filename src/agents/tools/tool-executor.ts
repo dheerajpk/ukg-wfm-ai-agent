@@ -1,12 +1,16 @@
 import {ToolCall} from "../../modules/ai/chat/chat-completion.types";
-import {executeTool} from "./get-hyperfind.tools";
+import {executeTool as executeGetCoWorkerTimeCardsTool} from "./get-timecards.tools";
+import {executeTool as executeGetUnsignedCoWorkersInfoTool} from "./get-hyperfind.tools";
 
 export async function executeToolCall(toolCall: ToolCall): Promise<unknown> {
   const args = JSON.parse(toolCall.function.arguments || "{}");
 
   switch (toolCall.function.name) {
     case "getUnsignedCoWorkersInfoHandler":
-      return executeTool(args);
+      return executeGetUnsignedCoWorkersInfoTool(args);
+
+    case "getCoWorkerTimeCardsHandler":
+      return executeGetCoWorkerTimeCardsTool(args);
 
     // case "get_timecard":
     //   return getTimecard(args);
