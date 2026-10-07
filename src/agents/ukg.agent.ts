@@ -5,6 +5,7 @@ import {
 } from "../modules/ai/chat/chat-completion.types";
 
 import {UKG_AGENT_HYPERFIND_UNSIGNED_COWORKERS_PROMPT} from "./prompts/hyperfind.prompt";
+import {UKG_AGENT_SCHEDULE_PROMPT} from "./prompts/schedule.prompt";
 import {UKG_AGENT_SYSTEM_PROMPT} from "./prompts/system.prompt";
 import {UKG_AGENT_TIME_CARD_PROMPT} from "./prompts/timecard.prompt";
 import {aiService} from "../modules/ai/ai.module";
@@ -13,6 +14,7 @@ import {getUkgToolDefinitions} from "./tools/tool-registry";
 
 const SIGNOFF_INTENT_PATTERN = /sign[\s-]?off|unsigned/i;
 const TIMECARD_INTENT_PATTERN = /timecard/i;
+const SCHEDULE_INTENT_PATTERN = /schedule|shift/i;
 
 // Picks the task prompt matching the latest user message's intent, falling back to both when unclear.
 function resolveTaskPrompt(messages: ChatMessage[]): string {
@@ -23,6 +25,7 @@ function resolveTaskPrompt(messages: ChatMessage[]): string {
 
   const mentionsSignoff = SIGNOFF_INTENT_PATTERN.test(text);
   const mentionsTimecard = TIMECARD_INTENT_PATTERN.test(text);
+  const mentionsSchedule = SCHEDULE_INTENT_PATTERN.test(text);
 
   if (mentionsSignoff) {
     return UKG_AGENT_HYPERFIND_UNSIGNED_COWORKERS_PROMPT;
@@ -30,6 +33,10 @@ function resolveTaskPrompt(messages: ChatMessage[]): string {
 
   if (mentionsTimecard) {
     return UKG_AGENT_TIME_CARD_PROMPT;
+  }
+
+  if (mentionsSchedule) {
+    return UKG_AGENT_SCHEDULE_PROMPT;
   }
 
   return `${UKG_AGENT_HYPERFIND_UNSIGNED_COWORKERS_PROMPT} \n ${UKG_AGENT_TIME_CARD_PROMPT}`;

@@ -15,7 +15,7 @@ export const fetchRequest = async <T>(
       "Content-Type": "application/json"
     };
     logger.info(
-      `Executing UKG request to endpoint: ${endpoint} with options: ${JSON.stringify(options)}`
+      `Executing UKG request to endpoint: ${UKGConfig.apiBaseUrl}${endpoint} with options: ${JSON.stringify(options)}`
     );
     const response = await fetch(`${UKGConfig.apiBaseUrl}${endpoint}`, options);
     if (!response.ok) {

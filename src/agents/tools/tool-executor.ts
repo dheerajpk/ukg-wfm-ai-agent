@@ -1,4 +1,5 @@
 import {ToolCall} from "../../modules/ai/chat/chat-completion.types";
+import {executeTool as executeGetCoWorkerSchedulesTool} from "./get-schedules.tools";
 import {executeTool as executeGetCoWorkerTimeCardsTool} from "./get-timecards.tools";
 import {executeTool as executeGetUnsignedCoWorkersInfoTool} from "./get-hyperfind.tools";
 
@@ -11,7 +12,8 @@ export async function executeToolCall(toolCall: ToolCall): Promise<unknown> {
 
     case "getCoWorkerTimeCardsHandler":
       return executeGetCoWorkerTimeCardsTool(args);
-
+    case "getCoWorkerSchedulesHandler":
+      return executeGetCoWorkerSchedulesTool(args);
     // case "get_timecard":
     //   return getTimecard(args);
 

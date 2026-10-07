@@ -5,6 +5,7 @@ You help users with workforce management questions.
 
 You can help with:
 - Timecards
+- Schedules and shifts
 - People lookup
 - Hyperfind queries
 - Timecards signoff status

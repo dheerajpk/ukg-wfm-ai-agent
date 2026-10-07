@@ -1,7 +1,15 @@
+import {LRUCache} from "lru-cache";
 import {UKGConfig} from "../../config/ukg.config";
 
+const cache = new LRUCache({max: 10});
+const CACHE_KEY = "ukg_access_token";
 //Get UKG access token
 export const getAccessToken = async () => {
+  const cachedToken = cache.get(CACHE_KEY);
+  if (cachedToken) {
+    return cachedToken;
+  }
+
   // Here you would typically use the UKGConfig to request an access token from the UKG auth server.
   const response = await fetch(UKGConfig.authUrl, {
     method: "POST",
@@ -17,6 +25,7 @@ export const getAccessToken = async () => {
     })
   });
   const data: any = await response.json();
-  //TODO: Handle refresh token and error response from the auth server.
+  const ttl = Math.max(1, data.expires_in - 30) * 1000;
+  cache.set(CACHE_KEY, data.access_token, {ttl});
   return data.access_token;
 };
