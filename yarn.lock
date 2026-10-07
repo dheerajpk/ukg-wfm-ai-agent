@@ -972,6 +972,11 @@ one-time@^1.0.0:
   dependencies:
     fn.name "1.x.x"
 
+openai@^7.30.0:
+  version "7.30.0"
+  resolved "https://registry.yarnpkg.com/openai/-/openai-7.30.0.tgz#d5e1e80b30b1325eac51c8bdf3cefcc6021b99e1"
+  integrity sha512-tvvcPdhS56B/79o0mJS5h4JndAov5Sz78T7CFl4gJ+C9S3GoSqHNLO6lG/8kdK+/c13zWEI97Srf66ar0V242g==
+
 p-retry@^4.6.2:
   version "4.6.2"
   resolved "https://registry.yarnpkg.com/p-retry/-/p-retry-4.6.2.tgz#9baae7184057edd4e17231cee04264106e092a16"

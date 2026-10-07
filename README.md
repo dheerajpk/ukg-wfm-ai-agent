@@ -30,7 +30,7 @@ The agent exposes an **OpenAI-compatible** `/v1/chat/completions` endpoint, so i
 - **OpenAI-compatible API** (`/v1/chat/completions`, `/v1/models`) — works with any client built against the OpenAI chat completions contract.
 - **Tool/function calling** — the LLM decides when to call UKG data tools (timecards, schedules, hyperfind) and the agent executes them against the live UKG API.
 - **Intent-based prompting** — user messages are routed to a task-specific system prompt (timecard, schedule, hyperfind) to keep the model focused and reduce hallucination.
-- **Pluggable AI provider layer** — `AiProvider` interface with a `provider.factory.ts` factory, currently implemented for Gemini (via Vertex AI), ready to add OpenAI/Azure/Anthropic/local providers.
+- **Pluggable AI provider layer** — `AiProvider` interface with a `provider.factory.ts` factory, currently implemented for **Gemini** (via Vertex AI) and **Local** (any OpenAI-compatible endpoint, e.g. [Ollama](https://ollama.com/)), ready to add OpenAI/Azure/Anthropic providers.
 - **Structured logging** with Winston, including request IDs for traceability.
 - **Zod-validated tool arguments** to guard against malformed function-call parameters from the model.
 
@@ -54,7 +54,9 @@ flowchart TD
     Agent -->|2. Chat completion| AIService[AiService]
     AIService --> Factory[provider.factory.ts]
     Factory --> Gemini[GeminiProvider<br/>Vertex AI]
+    Factory --> Local[LocalAIProvider<br/>OpenAI-compatible / Ollama]
     Gemini -->|tool_calls?| Agent
+    Local -->|tool_calls?| Agent
     Agent -->|3. Execute tools| ToolExecutor[Tool Executor]
     ToolExecutor --> Hyperfind[HyperfindService]
     ToolExecutor --> Timecards[TimecardsService]
@@ -71,7 +73,7 @@ flowchart TD
 
 - **API layer** (`src/api`) — Express routes exposing an OpenAI-compatible surface (`/health`, `/v1/chat/completions`, `/v1/models`).
 - **Agent layer** (`src/agents`) — `UkgAgent` orchestrates intent detection, prompt selection, AI calls, and tool execution.
-- **AI module** (`src/modules/ai`) — Provider-agnostic chat completion service with a factory that selects the configured `AiProvider` (currently Gemini/Vertex AI).
+- **AI module** (`src/modules/ai`) — Provider-agnostic chat completion service with a factory that selects the configured `AiProvider` (currently Gemini/Vertex AI or Local/OpenAI-compatible, e.g. Ollama).
 - **UKG module** (`src/modules/ukg`) — OAuth client-credentials auth, a shared HTTP client, and feature-specific services/mappers/types for Hyperfind, Timecards, and Schedules.
 
 ---
@@ -185,10 +187,14 @@ All configuration is loaded from environment variables via [src/config/env.ts](s
 
 | Variable | Description | Default |
 |---|---|---|
-| `AI_PROVIDER` | Active provider resolved by `provider.factory.ts`. Only `gemini` is implemented today. | — |
+| `AI_PROVIDER` | Active provider resolved by `provider.factory.ts`. Supports `gemini` or `local`. | — |
 | `GEMINI_MODEL` | Gemini model name used for chat completions | `gemini-2.5-flash-lite` |
 | `GCP_PROJECT` / `GOOGLE_CLOUD_PROJECT` | GCP project used for Vertex AI | — |
 | `VERTEX_LOCATION` | Vertex AI region | `global` |
+| `AI_LOCAL_BASE_URL` | Base URL of the OpenAI-compatible local endpoint (e.g. Ollama) used by `LocalAIProvider` | `http://127.0.0.1:11434/v1` |
+| `AI_LOCAL_API_KEY` | API key sent to the local endpoint; Ollama ignores it but the OpenAI SDK requires a value | `` (empty) |
+
+> **Local provider:** Set `AI_PROVIDER=local` to route chat completions through `LocalAIProvider` (`src/modules/ai/providers/local.provider.ts`), which talks to any OpenAI-compatible server via the `openai` SDK. The model name is hardcoded to `qwen3:1.7b` — pull it in Ollama first (`ollama pull qwen3:1.7b`) or update `LocalAIProvider.name` to match the model you have installed.
 
 ### UKG WFM
 
@@ -264,7 +270,7 @@ The codebase is intentionally modular so new UKG capabilities can be added witho
 1. **Add a UKG service** under `src/modules/ukg/<feature>/` with `*.types.ts`, `*.model.ts`, `*.mapper.ts`, and `*.service.ts`, following the pattern used by `timecards`/`schedules`/`hyperfind`.
 2. **Define a tool** in `src/agents/tools/get-<feature>.tools.ts` describing the function schema (name, description, parameters) and its handler, then register it in `tool-registry.ts` and `tool-executor.ts`.
 3. **Add a task prompt** in `src/agents/prompts/<feature>.prompt.ts` describing when/how the model should call the new tool, and wire up intent detection in `ukg.agent.ts`.
-4. **Add an AI provider** by implementing `AiProvider` (`src/modules/ai/providers/ai-provider.interface.ts`) and registering it in `provider.factory.ts` to support OpenAI, Azure OpenAI, Anthropic, or local models alongside Gemini.
+4. **Add an AI provider** by implementing `AiProvider` (`src/modules/ai/providers/ai-provider.interface.ts`) and registering it in `provider.factory.ts` to support OpenAI, Azure OpenAI, or Anthropic alongside Gemini and the existing Local (Ollama/OpenAI-compatible) provider.
 
 ---
 
@@ -274,5 +280,4 @@ The codebase is intentionally modular so new UKG capabilities can be added witho
 - [ ] **Accruals** (PTO/leave balances)
 - [ ] Additional Hyperfind queries beyond "non-signed-off co-workers"
 - [ ] Streaming chat completions
-- [ ] Additional AI providers (OpenAI, Azure OpenAI, Anthropic, local/on-prem models)
-- [ ] OAuth token caching/refresh for the UKG client
+- [ ] Additional AI providers (OpenAI, Azure OpenAI, Anthropic)
