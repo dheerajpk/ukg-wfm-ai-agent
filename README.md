@@ -16,6 +16,7 @@ The agent exposes an **OpenAI-compatible** `/v1/chat/completions` endpoint, so i
 - [Project Structure](#project-structure)
 - [Prerequisites](#prerequisites)
 - [Getting Started](#getting-started)
+- [Run Locally with a Chat UI (Open WebUI)](#run-locally-with-a-chat-ui-open-webui)
 - [Configuration](#configuration)
 - [API Reference](#api-reference)
 - [Example Usage](#example-usage)
@@ -168,6 +169,70 @@ yarn start
 ```
 
 By default the server listens on `http://localhost:5858` (configurable via `PORT`/`HOST`). On startup it logs the health check and chat completion endpoint URLs.
+
+---
+
+## Run Locally with a Chat UI (Open WebUI)
+
+Since the agent exposes an OpenAI-compatible API, you can chat with it through [Open WebUI](https://github.com/open-webui/open-webui) instead of `curl`/Postman. Run the agent with `yarn dev` (or `yarn start`) as described above, then point Open WebUI at it as a custom OpenAI connection.
+
+### 1. Start Open WebUI with Docker
+
+```bash
+docker run -d \
+  --name open-webui \
+  -p 3000:8080 \
+  --add-host=host.docker.internal:host-gateway \
+  -e OPENAI_API_BASE_URL=http://host.docker.internal:5858/v1 \
+  -e OPENAI_API_KEY=sk-ukg-wfm-ai-agent \
+  -v open-webui:/app/backend/data \
+  --restart always \
+  ghcr.io/open-webui/open-webui:main
+```
+
+> **Notes**
+> - `--add-host=host.docker.internal:host-gateway` lets the container reach the agent running on your host machine (already the default on Docker Desktop for Windows/Mac; required on Linux).
+> - `OPENAI_API_KEY` can be any non-empty string — the agent doesn't validate it, but Open WebUI/the OpenAI SDK requires a value to be set.
+> - Data (accounts, chats, settings) persists in the `open-webui` named volume across restarts.
+
+Or with **Docker Compose**:
+
+```yaml
+services:
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    ports:
+      - "3000:8080"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - OPENAI_API_BASE_URL=http://host.docker.internal:5858/v1
+      - OPENAI_API_KEY=sk-ukg-wfm-ai-agent
+    volumes:
+      - open-webui:/app/backend/data
+    restart: always
+
+volumes:
+  open-webui:
+```
+
+```bash
+docker compose up -d
+```
+
+### 2. Add the agent as a model in Open WebUI
+
+1. Open `http://localhost:3000` and create the initial admin account (first sign-up becomes admin).
+2. Go to **Settings → Admin Settings → Connections**.
+3. Under **OpenAI API**, confirm/add a connection:
+   - **API Base URL:** `http://host.docker.internal:5858/v1`
+   - **API Key:** the same value used for `OPENAI_API_KEY` above (e.g. `sk-ukg-wfm-ai-agent`)
+   - Click the refresh/verify icon — Open WebUI calls `GET /v1/models` and should list **`UKG-WFM-AI-AGENT`**.
+4. Save, then start a **New Chat** and pick **UKG-WFM-AI-AGENT** from the model dropdown at the top of the chat window.
+5. Ask it something like *"Which co-workers have not signed off their timecards between 2026-09-01 and 2026-09-07?"* and the agent will respond using the configured AI provider and UKG tools.
+
+> If the model doesn't appear automatically, it can also be added manually under **Settings → Admin Settings → Models → Add Model**, using `UKG-WFM-AI-AGENT` as both the name and model ID.
 
 ---
 
